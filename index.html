@@ -31,7 +31,7 @@
       width: 40%;
       border-right: 1px solid #ddd;
       padding: 10px;
-      overflow-y: hidden;
+      overflow-y: auto;
       background: #f9f9f9;
     }
 
@@ -41,9 +41,7 @@
 
     .code-box {
       height: calc(100% - 30px);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column-reverse;
+      overflow: auto;
       padding: 5px;
     }
 
@@ -53,6 +51,7 @@
       padding: 5px;
       background: #eef;
       border-radius: 4px;
+      white-space: pre-wrap;
     }
 
     .graph-section {
@@ -97,15 +96,36 @@
     const codeBox = document.getElementById('code-box');
     const complexityLine = document.getElementById('complexity-line');
 
+    const codeSnippets = [
+      "function add(a, b) { return a + b; }",
+      "const multiply = (x, y) => x * y;",
+      "class Calculator { add(a, b) { return a + b; } }",
+      "let counter = 0; counter++;",
+      "const isEven = n => n % 2 === 0;",
+      "for (let i = 0; i < 10; i++) { console.log(i); }",
+      "try { throw new Error('Oops!'); } catch (e) { console.error(e); }",
+      "const data = [1, 2, 3].map(n => n * 2);",
+      "document.getElementById('app').innerHTML = '<h1>Hello World!</h1>';",
+      "const fetchData = async () => { const res = await fetch('/api'); return res.json(); };",
+    ];
+
     let complexityPoints = [];
     let timeStep = 0;
     let currentComplexity = 10; // Starting complexity level
+    const maxSteps = 15; // Stop after 15 steps
 
     function addNewCode() {
+      if (timeStep >= maxSteps) {
+        return; // Stop adding new code after maxSteps
+      }
+
+      // Get a code snippet
+      const snippet = codeSnippets[timeStep % codeSnippets.length];
+
       // Create new code line
       const newLine = document.createElement('div');
       newLine.className = 'code-line';
-      newLine.textContent = `Code block ${timeStep + 1}`;
+      newLine.textContent = snippet;
       codeBox.appendChild(newLine);
 
       // Increment complexity slightly for each step
@@ -113,7 +133,7 @@
       currentComplexity += Math.random() * 5; // Add a random small increment
       complexityPoints.push([timeStep * 10, 50 - currentComplexity]);
 
-      // Keep adding points without removing old ones
+      // Update graph polyline
       const pointsStr = complexityPoints.map(point => point.join(',')).join(' ');
       complexityLine.setAttribute('points', pointsStr);
 
@@ -122,7 +142,12 @@
     }
 
     // Add new code every 1 second
-    setInterval(addNewCode, 1000);
+    const interval = setInterval(() => {
+      addNewCode();
+      if (timeStep >= maxSteps) {
+        clearInterval(interval); // Stop the interval after maxSteps
+      }
+    }, 1000);
   </script>
 </body>
 </html>
