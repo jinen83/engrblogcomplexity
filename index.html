@@ -25,6 +25,7 @@
       border-radius: 8px;
       background: #fff;
       overflow: hidden;
+      position: relative;
     }
 
     .code-stream {
@@ -71,6 +72,19 @@
       width: 90%;
       height: 80%;
     }
+
+    .reset-emoji {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .reset-emoji:hover {
+      transform: scale(1.2);
+    }
   </style>
 </head>
 <body>
@@ -91,10 +105,12 @@
         />
       </svg>
     </div>
+    <div class="reset-emoji" id="reset-emoji">🔄</div>
   </div>
   <script>
     const codeBox = document.getElementById('code-box');
     const complexityLine = document.getElementById('complexity-line');
+    const resetEmoji = document.getElementById('reset-emoji');
 
     const codeSnippets = [
       "function add(a, b) { return a + b; }",
@@ -111,43 +127,49 @@
 
     let complexityPoints = [];
     let timeStep = 0;
-    let currentComplexity = 10; // Starting complexity level
-    const maxSteps = 15; // Stop after 15 steps
+    let currentComplexity = 10;
+    const maxSteps = 15;
+    let interval;
 
     function addNewCode() {
       if (timeStep >= maxSteps) {
-        return; // Stop adding new code after maxSteps
+        clearInterval(interval);
+        return;
       }
 
-      // Get a code snippet
       const snippet = codeSnippets[timeStep % codeSnippets.length];
 
-      // Create new code line
       const newLine = document.createElement('div');
       newLine.className = 'code-line';
       newLine.textContent = snippet;
       codeBox.appendChild(newLine);
 
-      // Increment complexity slightly for each step
       timeStep += 1;
-      currentComplexity += Math.random() * 5; // Add a random small increment
+      currentComplexity += Math.random() * 5;
       complexityPoints.push([timeStep * 10, 50 - currentComplexity]);
 
-      // Update graph polyline
       const pointsStr = complexityPoints.map(point => point.join(',')).join(' ');
       complexityLine.setAttribute('points', pointsStr);
 
-      // Scroll to show the latest code
       codeBox.scrollTop = codeBox.scrollHeight;
     }
 
-    // Add new code every 1 second
-    const interval = setInterval(() => {
-      addNewCode();
-      if (timeStep >= maxSteps) {
-        clearInterval(interval); // Stop the interval after maxSteps
-      }
-    }, 1000);
+    function startAnimation() {
+      clearInterval(interval);
+      timeStep = 0;
+      currentComplexity = 10;
+      complexityPoints = [];
+      codeBox.innerHTML = '';
+      complexityLine.setAttribute('points', '');
+
+      interval = setInterval(() => {
+        addNewCode();
+      }, 1000);
+    }
+
+    resetEmoji.addEventListener('click', startAnimation);
+
+    startAnimation();
   </script>
 </body>
 </html>
